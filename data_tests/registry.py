@@ -3,7 +3,7 @@ import inspect
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 
-from validated.models import TestMethod
+from data_tests.models import TestMethod
 
 
 def populate_test_methods():

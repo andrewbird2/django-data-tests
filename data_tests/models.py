@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from model_utils.models import TimeStampedModel
 
-from validated.constants import MAX_MESSAGE_LENGTH
+from data_tests.constants import MAX_MESSAGE_LENGTH
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
-from validated.models import TestResult
+from data_tests.models import TestResult
 
 
 @admin.register(TestResult)
@@ -24,7 +24,7 @@ class TestResultAdmin(admin.ModelAdmin):
     object_link.allow_tags = True
 
 
-class ValidatedAdminMixin():
+class DataTestsAdminMixin():
     def run_tests(self, request, obj):
         TestResult.rerun_tests_for_object(obj)
         obj.refresh_from_db()

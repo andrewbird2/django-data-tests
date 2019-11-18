@@ -2,8 +2,8 @@
 from django.apps import AppConfig
 
 
-class ValidatedConfig(AppConfig):
-    name = 'validated'
+class DataTestsConfig(AppConfig):
+    name = 'data_tests'
 
     def ready(self):
         from .registry import populate_test_methods

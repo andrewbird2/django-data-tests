@@ -5,7 +5,7 @@ from django.views.generic import TemplateView
 from . import views
 
 
-app_name = 'validated'
+app_name = 'data_tests'
 urlpatterns = [
     url(
         regex="^TestResult/~create/$",

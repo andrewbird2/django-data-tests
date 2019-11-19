@@ -108,6 +108,9 @@ class TestResult(TimeStampedModel):
     object_id = models.PositiveIntegerField(blank=True, null=True, db_index=True)
     object = fields.GenericForeignKey('content_type', 'object_id')
 
+    def __str__(self):
+        return str(self.test_method)
+
     class Meta:
         unique_together = ['test_method', 'object_id', 'content_type']
 

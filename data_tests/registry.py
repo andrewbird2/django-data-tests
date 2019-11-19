@@ -9,7 +9,7 @@ from data_tests.models import TestMethod
 def populate_test_methods():
     for cls in apps.get_models():
         for name, method in inspect.getmembers(cls):
-            if hasattr(method, 'is_model_test') and method.is_model_test:
+            if getattr(method, 'is_data_test', False):
                 content_type = ContentType.objects.get_for_model(cls)
                 tm, created = TestMethod.objects.update_or_create(
                     content_type=content_type,
@@ -24,7 +24,7 @@ def populate_test_methods():
 # Used as a decorator
 def test_method(title=None, is_class_method=False):
     def test_method_inner(method):
-        method.is_model_test = True
+        method.is_data_test = True
         method.is_class_method = is_class_method
         method.model_test_title = title
         return method

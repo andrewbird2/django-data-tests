@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class TestMethod(models.Model):
     title = models.CharField(max_length=256)
     method_name = models.CharField(max_length=256)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='test_methods')
     is_class_method = models.BooleanField()
 
     def __str__(self):
@@ -104,7 +104,7 @@ class TestResult(TimeStampedModel):
     xfail = models.BooleanField(default=False, verbose_name="Supposed to fail")
     justification = models.CharField(blank=True, max_length=500)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='test_results')
     object_id = models.PositiveIntegerField(blank=True, null=True, db_index=True)
     object = fields.GenericForeignKey('content_type', 'object_id')
 

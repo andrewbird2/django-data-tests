@@ -53,9 +53,20 @@ class TestMethod(models.Model):
         for result in self.test_results.all():
             result.run_test_method()
 
+    def class_method_result(self):
+        assert self.is_class_method
+        results = getattr(self.model_class(), self.method_name)()
+        if type(results) is tuple:
+            failing, message = results
+        else:
+            failing = results
+            message = None
+
+        return failing, message
+
     def _run_test_method_class(self):
         try:
-            qs_failing, message = getattr(self.model_class(), self.method_name)()
+            qs_failing, message = self.class_method_result()
 
             # Update failing results
             self.test_results.filter(object_id__in=qs_failing.values_list('id', flat=True)).update(passed=False,
@@ -126,7 +137,7 @@ class TestResult(TimeStampedModel):
         try:
             method = self.test_method.method()
             if self.test_method.is_class_method:
-                qs_failing, message = method(self.test_method.model_class())
+                qs_failing, message = self.test_method.class_method_result()
                 if self.object in qs_failing:
                     method_result = False, message
                 else:

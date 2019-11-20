@@ -55,7 +55,7 @@ class TestMethod(models.Model):
 
     def _run_test_method_class(self):
         try:
-            qs_failing, message = self.method()(self.model_class())
+            qs_failing, message = getattr(self.model_class(), self.method_name)()
 
             # Update failing results
             self.test_results.filter(object_id__in=qs_failing.values_list('id', flat=True)).update(passed=False,

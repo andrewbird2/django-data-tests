@@ -26,8 +26,8 @@ class Command(BaseCommand):
         model = options.get('model')
         test_method = options.get('test_method')
         if test_method:
-            tm = TestMethod.objects.get(method_name=test_method)
-            tm.run_test_method()
+            for tm in TestMethod.objects.filter(method_name=test_method):
+                tm.run_test_method()
         elif model:
             qs = ContentType.objects.filter(model__iexact=model)
             if qs.count() > 1:

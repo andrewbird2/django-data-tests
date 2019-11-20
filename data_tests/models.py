@@ -69,7 +69,7 @@ class TestMethod(models.Model):
             self.test_results.update(passed=False, message="Test failed to run correctly! {}".format(str(e)))
 
     def run_test_method(self):
-        logger.info('Running test: {}'.format(self))
+        logger.info('Running test: {} {}'.format(self.content_type, self))
         self.delete_stale_results()
         self.add_new_result_objects()
         if self.is_class_method:
@@ -78,7 +78,7 @@ class TestMethod(models.Model):
             self._run_test_method_instance()
 
         results = self.test_results.all()
-        logger.info('Test completed: {} successful, {} failing (of which {} are supposed to fail)'.format(
+        logger.info('Test completed: {} successful, {} failing (of which {} are supposed to fail)\n'.format(
             results.filter(passed=True).count(),
             results.filter(passed=False).count(),
             results.filter(passed=False, xfail=True).count()

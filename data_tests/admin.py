@@ -24,7 +24,7 @@ class TestResultAdmin(admin.ModelAdmin):
     object_link.allow_tags = True
 
 
-class DataTestsAdminMixin():
+class DataTestsAdminMixin(object):
     def run_tests(self, request, obj):
         TestResult.rerun_tests_for_object(obj)
         obj.refresh_from_db()
@@ -38,8 +38,8 @@ class DataTestsAdminMixin():
 
     def response_add(self, request, obj, post_url_continue=None):
         self.run_tests(request, obj)
-        return super().response_add(request, obj, post_url_continue)
+        return super(DataTestsAdminMixin, self).response_add(request, obj, post_url_continue)
 
     def response_change(self, request, obj):
         self.run_tests(request, obj)
-        return super().response_change(request, obj)
+        return super(DataTestsAdminMixin, self).response_change(request, obj)

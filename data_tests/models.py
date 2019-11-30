@@ -70,7 +70,7 @@ class TestMethod(models.Model):
 
             # Update failing results
             self.test_results.filter(object_id__in=qs_failing.values_list('id', flat=True)).update(passed=False,
-                                                                                                   message=message)
+                                                                                                   message=message, '')
 
             # Update passing results
             self.test_results.exclude(object_id__in=qs_failing.values_list('id', flat=True)).update(passed=True,

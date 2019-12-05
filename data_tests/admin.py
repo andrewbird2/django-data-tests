@@ -1,4 +1,6 @@
 from django.contrib import admin, messages
+from django.contrib.contenttypes.admin import GenericTabularInline
+from django.contrib.contenttypes.forms import BaseGenericInlineFormSet
 from django.utils.safestring import mark_safe
 
 from data_tests.models import TestResult
@@ -43,3 +45,25 @@ class DataTestsAdminMixin(object):
     def response_change(self, request, obj):
         self.run_tests(request, obj)
         return super(DataTestsAdminMixin, self).response_change(request, obj)
+
+
+class TestResultFormset(BaseGenericInlineFormSet):
+    def get_queryset(self):
+        if not hasattr(self, '_queryset'):
+            qs = super(TestResultFormset, self).get_queryset().filter(passed=False)
+            self._queryset = qs
+        return self._queryset
+
+
+class TestResultInline(GenericTabularInline):
+    model = TestResult
+    formset = TestResultFormset
+    max_num = 0
+    can_delete = False
+    readonly_fields = ('test_method', 'details')
+    fields = ('test_method', 'details', 'xfail', 'justification')
+
+    def details(self, obj):
+        return mark_safe(obj.message)
+
+    exclude = ['method_name']

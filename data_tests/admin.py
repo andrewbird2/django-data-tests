@@ -1,6 +1,7 @@
 from django.contrib import admin, messages
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.contrib.contenttypes.forms import BaseGenericInlineFormSet
+from django.urls import NoReverseMatch
 from django.utils.safestring import mark_safe
 
 from data_tests.models import TestResult
@@ -21,8 +22,10 @@ class TestResultAdmin(admin.ModelAdmin):
     details.allow_tags = True
 
     def object_link(self, obj):
-        return obj.object_admin_hyperlink(str(obj.object))
-
+        try:
+            return obj.object_admin_hyperlink(str(obj.object))
+        except NoReverseMatch:
+            return 'No admin page implemented'
     object_link.allow_tags = True
 
 

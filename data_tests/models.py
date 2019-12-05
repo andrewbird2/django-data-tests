@@ -46,8 +46,6 @@ class TestMethod(models.Model):
             to_insert.append(TestResult(test_method=self, content_type=self.content_type, object_id=new_id))
 
         TestResult.objects.bulk_create(to_insert)
-        if to_insert:
-            logger.info('Inserted {} new results.'.format(len(to_insert), self))
 
     def _run_test_method_instance(self):
         for result in self.test_results.all():

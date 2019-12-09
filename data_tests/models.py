@@ -150,7 +150,7 @@ class TestResult(TimeStampedModel):
         else:
             passed, message = method_result
             self.passed = passed
-            self.message = message[0:MAX_MESSAGE_LENGTH]
+            self.message = message[0:MAX_MESSAGE_LENGTH] if message else ''
 
         self.save()
 

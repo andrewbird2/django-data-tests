@@ -106,6 +106,19 @@ class TestMethod(models.Model):
         for test_method in cls.objects.all():
             test_method.run_test_method()
 
+    @classmethod
+    def add_test_methods_for_content_type(cls, content_type):
+        from data_tests.registry import test_methods
+        method_dicts = filter(lambda x: x['content_type'] == content_type, test_methods)
+        should_exist = set([x['method_name'] for x in method_dicts])
+        does_exist = set([x.method_name for x in cls.objects.filter(content_type=content_type)])
+
+        if should_exist - does_exist:
+            for method_name in should_exist - does_exist:
+                dict = list(filter(lambda x: x['method_name'] == method_name, test_methods))[0]
+                test_method, created = cls.objects.update_or_create(**dict)
+                assert created
+
 
 @python_2_unicode_compatible
 class TestResult(TimeStampedModel):
@@ -176,7 +189,14 @@ class TestResult(TimeStampedModel):
     def test_results_for_object(cls, obj):
         model = obj._meta.model
         ct = ContentType.objects.get(app_label=model._meta.app_label, model=model._meta.model_name)
-        return TestResult.objects.filter(content_type=ct, object_id=obj.pk)
+        TestMethod.add_test_methods_for_content_type(ct)
+        missing_test_methods = TestMethod.objects.filter(content_type=ct).exclude(
+            id__in=cls.objects.filter(content_type=ct,
+                                      object_id=obj.pk).values_list(
+                'test_method_id', flat=True))
+        for test_method in missing_test_methods:
+            cls.objects.create(content_type=ct, object_id=obj.pk, test_method=test_method)
+        return cls.objects.filter(content_type=ct, object_id=obj.pk)
 
     @classmethod
     def rerun_tests_for_object(cls, obj):

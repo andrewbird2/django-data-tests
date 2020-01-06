@@ -2,6 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand  # NOQA
 
 from data_tests.models import TestMethod
+from data_tests.registry import add_test_methods_to_database
 
 
 class Command(BaseCommand):
@@ -23,6 +24,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        add_test_methods_to_database()
+
         model = options.get('model')
         test_method = options.get('test_method')
         if test_method:

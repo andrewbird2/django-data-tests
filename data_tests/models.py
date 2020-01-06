@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 @python_2_unicode_compatible
 class TestMethod(models.Model):
+    class Meta:
+        unique_together = (('content_type', 'method_name'),)
+
     title = models.CharField(max_length=256)
     method_name = models.CharField(max_length=256)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='test_methods')

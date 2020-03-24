@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from functools import lru_cache
 import logging
 
+from django.apps import apps
 from django.contrib.contenttypes import fields
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import models, router
 from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from model_utils.models import TimeStampedModel
@@ -13,11 +15,13 @@ from data_tests.constants import MAX_MESSAGE_LENGTH
 
 logger = logging.getLogger(__name__)
 
+db_for_read = lru_cache()(router.db_for_read)
+
 
 @python_2_unicode_compatible
 class TestMethod(models.Model):
     class Meta:
-        unique_together = (('content_type', 'method_name'),)
+        unique_together = ('content_type', 'method_name')
 
     title = models.CharField(max_length=256)
     method_name = models.CharField(max_length=256)
@@ -130,13 +134,26 @@ class TestResult(TimeStampedModel):
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='test_results')
     object_id = models.PositiveIntegerField(blank=True, null=True, db_index=True)
-    object = fields.GenericForeignKey('content_type', 'object_id')
 
     def __str__(self):
         return str(self.test_method)
 
     class Meta:
-        unique_together = ['test_method', 'object_id', 'content_type']
+        unique_together = ('test_method', 'object_id', 'content_type')
+
+    @staticmethod
+    @lru_cache()
+    def get_model_class_from_content_type(content_type_id):
+        """ cached version of self.content_type.model_class() """
+        ct = ContentType.objects.get(id=content_type_id)
+        return apps.get_model(ct.app_label, ct.model)
+
+    def get_object(self):
+        """ return the object that was tested """
+        model_class = self.get_model_class_from_content_type(self.content_type_id)
+        db_alias = db_for_read(model_class)
+        manager = model_class._base_manager.using(db_alias)
+        return manager.get(pk=self.object_id)
 
     @classmethod
     def get_test_results(cls, obj=None, qs=None):
@@ -148,15 +165,16 @@ class TestResult(TimeStampedModel):
 
     def run_test_method(self):
         try:
+            obj = self.get_object()
             method = self.test_method.method()
             if self.test_method.is_class_method:
                 qs_failing, message = self.test_method.class_method_result()
-                if self.object in qs_failing:
+                if obj in qs_failing:
                     method_result = False, message
                 else:
                     method_result = True
             else:
-                method_result = method(self.object)
+                method_result = method(obj)
         except Exception as e:
             method_result = False, "Test failed to run correctly! {}".format(str(e))
 

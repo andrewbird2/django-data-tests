@@ -23,7 +23,8 @@ class TestResultAdmin(admin.ModelAdmin):
 
     def object_link(self, obj):
         try:
-            return obj.object_admin_hyperlink(str(obj.object))
+            link_name = str(obj.get_object())
+            return obj.object_admin_hyperlink(link_name)
         except NoReverseMatch:
             return 'No admin page implemented'
     object_link.allow_tags = True

@@ -46,7 +46,7 @@ class TestMethod(models.Model):
             logger.info('Deleted {} stale test results'.format(deleted))
 
     def add_new_result_objects(self):
-        all_object_pks = set(self.model_class().objects.values_list('pk', flat=True))
+        all_object_pks = set(self.model_class()._base_manager.values_list('pk', flat=True))
         existing_test_results = set(self.test_results.values_list('object_id', flat=True))
         to_insert = []
         for new_id in all_object_pks - existing_test_results:

@@ -112,16 +112,13 @@ class TestMethod(models.Model):
 
     @classmethod
     def add_test_methods_for_content_type(cls, content_type):
-        from data_tests.registry import test_methods
-        method_dicts = filter(lambda x: x['content_type'] == content_type, test_methods)
-        should_exist = set([x['method_name'] for x in method_dicts])
-        does_exist = set([x.method_name for x in cls.objects.filter(content_type=content_type)])
-
-        if should_exist - does_exist:
-            for method_name in should_exist - does_exist:
-                dict = list(filter(lambda x: x['method_name'] == method_name, test_methods))[0]
-                test_method, created = cls.objects.update_or_create(**dict)
-                assert created
+        from data_tests.registry import registry
+        for method_name, defaults in registry[content_type].items():
+            cls.objects.update_or_create(
+                content_type=content_type,
+                method_name=method_name,
+                defaults=defaults
+            )
 
 
 @python_2_unicode_compatible

@@ -1,3 +1,4 @@
+from collections import defaultdict
 import inspect
 
 from django.apps import apps
@@ -5,27 +6,28 @@ from django.contrib.contenttypes.models import ContentType
 
 from data_tests.models import TestMethod
 
-test_methods = list()
+registry = defaultdict(dict)
 
 def load_test_methods():
-    for cls in apps.get_models():
-        content_type = ContentType.objects.get_for_model(cls)
-        for name, method in inspect.getmembers(cls):
+    for model in apps.get_models():
+        content_type = ContentType.objects.get_for_model(model)
+        for name, method in inspect.getmembers(model):
             if getattr(method, 'is_data_test', False):
-                tm_dict = {
-                    'content_type': content_type,
-                    'method_name': method.__name__,
-                    'defaults': {
-                        'title': method.model_test_title or method.__name__.replace('_', ' ').capitalize(),
-                        'is_class_method': method.is_class_method
-                    }
+                registry[content_type][method.__name__] = {
+                    'title': method.model_test_title or
+                             method.__name__.replace('_', ' ').capitalize(),
+                    'is_class_method': method.is_class_method
                 }
-                test_methods.append(tm_dict)
 
 
 def add_test_methods_to_database():
-    for tm_dict in test_methods:
-        TestMethod.objects.update_or_create(**tm_dict)
+    for content_type, method_dict in registry.items():
+        for method_name, defaults in method_dict.items():
+            TestMethod.objects.update_or_create(
+                content_type=content_type,
+                method_name=method_name,
+                defaults=defaults
+            )
 
 # Used as a decorator
 def test_method(title=None, is_class_method=False):

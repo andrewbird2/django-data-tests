@@ -8,7 +8,6 @@ from django.contrib.contenttypes import fields
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, router
 from django.urls import reverse
-from django.utils.encoding import python_2_unicode_compatible
 from model_utils.models import TimeStampedModel
 
 from data_tests.constants import MAX_MESSAGE_LENGTH
@@ -18,7 +17,6 @@ logger = logging.getLogger(__name__)
 db_for_read = lru_cache()(router.db_for_read)
 
 
-@python_2_unicode_compatible
 class TestMethod(models.Model):
     class Meta:
         unique_together = ('content_type', 'method_name')
@@ -121,7 +119,6 @@ class TestMethod(models.Model):
             )
 
 
-@python_2_unicode_compatible
 class TestResult(TimeStampedModel):
     test_method = models.ForeignKey(TestMethod, on_delete=models.CASCADE, related_name='test_results')
     message = models.CharField(max_length=MAX_MESSAGE_LENGTH)
